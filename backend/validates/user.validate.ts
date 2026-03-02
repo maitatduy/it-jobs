@@ -71,3 +71,67 @@ export const registerPost = (req: Request, res: Response, next: NextFunction) =>
 
     next();
 };
+
+export const loginPost = (req: Request, res: Response, next: NextFunction) => {
+    const loginSchema = Joi.object({
+        email: Joi.string().trim().email().required().messages({
+            'string.empty': 'Vui lòng nhập email của bạn!',
+            'string.email': 'Email không đúng định dạng!',
+            'any.required': 'Vui lòng nhập email của bạn!',
+        }),
+
+        password: Joi.string()
+            .required()
+            .custom((value, helpers) => {
+                if (value.length < 8) {
+                    return helpers.error('any.custom', {
+                        message: 'Mật khẩu phải chứa ít nhất 8 ký tự!',
+                    });
+                }
+
+                if (!/[A-Z]/.test(value)) {
+                    return helpers.error('any.custom', {
+                        message: 'Mật khẩu phải chứa ít nhất một chữ cái in hoa!',
+                    });
+                }
+
+                if (!/[a-z]/.test(value)) {
+                    return helpers.error('any.custom', {
+                        message: 'Mật khẩu phải chứa ít nhất một chữ cái thường!',
+                    });
+                }
+
+                if (!/\d/.test(value)) {
+                    return helpers.error('any.custom', {
+                        message: 'Mật khẩu phải chứa ít nhất một chữ số!',
+                    });
+                }
+
+                if (!/[@$!%*?&]/.test(value)) {
+                    return helpers.error('any.custom', {
+                        message: 'Mật khẩu phải chứa ít nhất một ký tự đặc biệt!',
+                    });
+                }
+
+                return value;
+            })
+            .messages({
+                'string.empty': 'Vui lòng nhập mật khẩu!',
+                'any.required': 'Vui lòng nhập mật khẩu!',
+                'any.custom': '{{#message}}',
+            }),
+    });
+
+    const { error } = loginSchema.validate(req.body, {
+        abortEarly: false,
+    });
+
+    if (error) {
+        return res.json({
+            code: 'error',
+            message: error.details[0].message,
+        });
+    }
+
+    next();
+};
