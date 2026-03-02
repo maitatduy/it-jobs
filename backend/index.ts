@@ -2,6 +2,7 @@ import express, { Request, Response } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import routes from './routes/index.route';
+import cookieParser = require('cookie-parser');
 import { connectDB } from './config/database.config';
 
 // Load biến môi trường
@@ -29,6 +30,9 @@ connectDB().then(() => {
 
 // Parse JSON body
 app.use(express.json());
+
+// Cấu hình lấy cookie
+app.use(cookieParser());
 
 // Thiết lập đường dẫn
 app.use('/', routes);
